@@ -17,7 +17,21 @@ def generate_progress_callback():
     return cb
 
 def inv(a, b, progress_callback=None, singular_callback=None):
-    "Solve xa = b by doing column operations."
+    """Solve xa = b by doing column operations.
+    This function destroys the original matrix a.
+    
+    It calls progress_callback as it goes:
+      progress_callback("forward", i)
+      progress_callback("backward", i)
+      progress_callback("done", i)
+    If progress_callback is None, this is displayed by a progressbar() so you can see how things are going.
+    
+    If a is singular, then:
+      if singular_callback is None, the function dies with an Exception()
+      otherwise,
+        it calls singular_callback with the row where the pivoting failed and the partially lower-triangular matrix.
+        This behaviour is used by nonzero_null_vector to extract a null vector.
+    """
     x = b
     assert x.cols == a.cols
     if not progress_callback:
@@ -57,7 +71,7 @@ def inv(a, b, progress_callback=None, singular_callback=None):
         best_degree = None
         for ipivot in range(i, a.cols):
             if a[i, ipivot] != 0:
-                d = degree(numer(a[i, ipivot]))
+                d = total_degree(numer(a[i, ipivot]))
                 if best_degree is None or d < best_degree:
                     ip = ipivot
                     best_degree = d
@@ -93,6 +107,8 @@ def inv(a, b, progress_callback=None, singular_callback=None):
     return x
 
 def inverse(A, indices_from, indices_to):
+    """Returns A^{-1}[indices_from, indices_to] as SparseMatrix.
+    This function destroys the original matrix A."""
     assert A.rows == A.cols
     size = A.rows
 
@@ -107,7 +123,8 @@ def inverse(A, indices_from, indices_to):
     return t
 
 def nonzero_null_vector(A, progress_callback=None):
-    "If A is singular, this function returns a nonzero null vector."
+    """If A is singular, this function returns a nonzero right null vector.
+    This function destroys the original matrix A."""
     null = [None]
 
     def singular_callback(i, a):

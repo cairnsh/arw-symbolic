@@ -90,13 +90,17 @@ def inv(a, b, progress_callback=None, singular_callback=None):
         SCALE(i, 1/a[i, i])
         for j in range(i + 1, a.cols):
             ADD(i, j, -a[i, j])
+            if progress_callback:
+                progress_callback("forward", i, "adding", i, "to", j, "degree of last pivot:", best_degree)
         if progress_callback:
-            progress_callback("forward", i, "degree", best_degree)
+            progress_callback("forward", i, "degree of last pivot:", best_degree)
 
     "A is now upper-triangular; solve for x"
     for i in range(a.cols-1, -1, -1):
         for j in range(i):
             x[:, j] = (x[:,j] - x[:,i]*a[i,j]).applyfunc(cancel)
+            if progress_callback:
+                progress_callback("backward", i, "adding", i, "to", j)
             #for l in range(x.rows):
             #    x[l, j] = cancel(x[l, j] - x[l, i] * a[i, j])
         if progress_callback:

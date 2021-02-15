@@ -2,6 +2,7 @@ from sympy import *
 LAMBDA = lambda m: symbols("λ_%d" % m)
 FRAC = lambda p, q: Rational(p, q)
 STOP = -999
+SINK = -404
 
 def polynomialize(z):
     z = [simplify(j) for j in z]
